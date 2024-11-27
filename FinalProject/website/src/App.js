@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useMemo } from "react";
+import React, { useRef, useEffect, useState, useMemo, useCallback } from "react";
 import ForceGraph3D from "react-force-graph-3d";
 import * as THREE from 'three';
 import { NODES, EDGES } from './constants.js';
@@ -21,12 +21,12 @@ const App = () => {
   const handleNodeHover = (node) => {
     setHoveredNode(node);
     if (node) {
-      const partitionLetter = String.fromCharCode(65 + node.partition); // Convert partition number to letter
+      const partitionString = getParititionString(node.partition);
       tooltipRef.current.style.display = "block";
       tooltipRef.current.innerHTML = `
         <strong>${node.name}</strong><br/>
         <em>ID:</em> ${node.id}<br/>
-        <em>Partition:</em> ${partitionLetter}<br/>
+        <em>Partition:</em> ${partitionString}<br/>
         <em>Total Edges:</em> ${node.num_edges}<br/>
         <em>Bruh </br>
         <em>Rank:</em> ${node.rank}<br/>
@@ -41,33 +41,39 @@ const App = () => {
     }
   };
 
-  const handleNodeClick = (node) => {
+  const getParititionString = (partition) => {
+    switch (partition) {
+      case 0: return "Nixon Era";
+      case 1: return "Clinton Era";
+      case 2: return "Carter/Reagan/H. W. Bush Era";
+      case 3: return "Bush Era";
+      case 4: return "Obama Era";
+      case 5: return "Trump Era";
+      case 6: return "Biden Era";
+      default: return "Unknown Era";
+    }
+  };
+
+  const handleNodeClick = useCallback((node) => {
     if (node && node.url) {
       window.open(node.url, '_blank');
     }
-  };
+  }, []);
 
   const interpolateColor = (partition) => {
-    if (partition == 0) {
-      return 0xFFB3B3; // Pastel Red
-    } else if (partition == 1) {
-      return 0xB3FFB3; // Pastel Green
-    } else if (partition == 2) {
-      return 0xB3B3FF; // Pastel Blue
-    } else if (partition == 3) {
-      return 0xFFD9B3; // Pastel Orange
-    } else if (partition == 4) {
-      return 0xFFB3DE; // Pastel Pink
-    } else if (partition == 5) {
-      return 0xB3FFFF; // Pastel Cyan
-    } else if (partition == 6) {
-      return 0xFFFFB3; // Pastel Yellow
-    } else {
-      return 0xFFFFFF; // Default: White for undefined partitions
+    switch (partition) {
+      case 0: return 0xFFB3B3; // Pastel Red
+      case 1: return 0xB3FFB3; // Pastel Green
+      case 2: return 0xB3B3FF; // Pastel Blue
+      case 3: return 0xFFD9B3; // Pastel Orange
+      case 4: return 0xFFB3DE; // Pastel Pink
+      case 5: return 0xB3FFFF; // Pastel Cyan
+      case 6: return 0xFFFFB3; // Pastel Yellow
+      default: return 0xFFFFFF; // Default: White for undefined partitions
     }
   };
 
-  const nodeThreeObject = useMemo(() => (node) => {
+  const nodeThreeObject = useCallback((node) => {
     const minSize = 0; 
     const maxSize = 300;
     
@@ -85,7 +91,7 @@ const App = () => {
     return new THREE.Mesh(geometry, material);
   }, []);
 
-  const linkColor = useMemo(() => (link) => 
+  const linkColor = useCallback((link) => 
   {
     if (hoveredNode && (link.source.id === hoveredNode.id || link.target.id === hoveredNode.id)) 
     {
@@ -127,7 +133,7 @@ const App = () => {
           `<div class="tooltip-text">
             <strong>${node.name}</strong><br/>
             <em>ID:</em> ${node.id}<br/>
-            <em>Partition:</em> ${String.fromCharCode(65 + node.partition)}<br/>
+            <em>Partition:</em> ${getParititionString(node.partition)}<br/>
             <em>Total Edges:</em> ${node.num_edges}<br/>
             <em>Rank:</em> ${node.rank}<br/>
             <em>PageRank:</em> ${node.page_rank}<br/>
@@ -171,4 +177,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default React.memo(App);
