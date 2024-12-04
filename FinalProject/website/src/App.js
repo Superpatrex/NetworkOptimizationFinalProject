@@ -62,14 +62,14 @@ const App = () => {
 
   const interpolateColor = (partition) => {
     switch (partition) {
-      case 0: return 0xFFB3B3; // Pastel Red
-      case 1: return 0xB3FFB3; // Pastel Green
-      case 2: return 0xB3B3FF; // Pastel Blue
-      case 3: return 0xFFD9B3; // Pastel Orange
-      case 4: return 0xFFB3DE; // Pastel Pink
-      case 5: return 0xB3FFFF; // Pastel Cyan
-      case 6: return 0xFFFFB3; // Pastel Yellow
-      default: return 0xFFFFFF; // Default: White for undefined partitions
+      case 0: return 0xFFB3B3;
+      case 1: return 0xB3FFB3;
+      case 2: return 0xB3B3FF;
+      case 3: return 0xFFD9B3;
+      case 4: return 0xFFB3DE;
+      case 5: return 0xB3FFFF;
+      case 6: return 0xFFFFB3;
+      default: return 0xFFFFFF;
     }
   };
 
@@ -165,12 +165,12 @@ const App = () => {
       >
         <strong>Legend</strong><br/>
         <span style={{ color: "#FFB3B3" }}>■</span> Nixon Era<br/>
-        <span style={{ color: "#B3B3FF" }}>■</span> Carter/Reagan/H. W. Bush Era<br/>
-        <span style={{ color: "#B3FFB3" }}>■</span> Clinton Era<br/>
-        <span style={{ color: "#FFD9B3" }}>■</span> Bush Era<br/>
-        <span style={{ color: "#FFB3DE" }}>■</span> Obama Era<br/>
-        <span style={{ color: "#FFFFB3" }}>■</span> Biden Era<br/>
-        <span style={{ color: "#B3FFFF" }}>■</span> Trump Era<br/>
+        <span style={{ color: "#FFFFB3" }}>■</span> Carter/Reagan/H. W. Bush Era<br/>
+        <span style={{ color: "#B3B3FF" }}>■</span> Clinton Era<br/>
+        <span style={{ color: "#B3FFB3" }}>■</span> Bush Era<br/>
+        <span style={{ color: "#FFD9B3" }}>■</span> Obama Era<br/>
+        <span style={{ color: "#B3FFFF" }}>■</span> Biden Era<br/>
+        <span style={{ color: "#FFB3DE" }}>■</span> Trump Era<br/>
       </div>
     </div>
     

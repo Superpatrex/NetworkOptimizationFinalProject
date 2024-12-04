@@ -63,14 +63,11 @@ WIKIPEDIA_URLS = [
     ]
 
 def get_embedded_links(url):
-    # Fetch the HTML content of the Wikipedia page
     response = requests.get(url)
-    response.raise_for_status()  # Check if the request was successful
+    response.raise_for_status()
 
-    # Parse the HTML content using BeautifulSoup
     soup = BeautifulSoup(response.text, 'html.parser')
 
-    # Extract all the embedded links
     links = set()
     for a_tag in soup.find_all('a', href=True):
         href = a_tag['href']
@@ -91,9 +88,8 @@ def convert_wikipedia_url_to_text(url):
     return urllib.parse.unquote(url).split('/wiki/')[1].replace('_', ' ')
 
 def run_presidential_election_web_scrapper():
-    adjacency_list = {url: [] for url in WIKIPEDIA_URLS}  # Initialize adjacency list
+    adjacency_list = {url: [] for url in WIKIPEDIA_URLS}
 
-    # Create a mapping from URLs to integers
     url_to_id = {}
     unique_id_counter = 0
     adjacency_list = {}
@@ -124,9 +120,16 @@ def run_presidential_election_web_scrapper():
     partition = community_louvain.best_partition(G)
     pagerank_scores = nx.pagerank(G, alpha=0.85)
     hubs, authorities = nx.hits(G, max_iter=100, tol=1.0e-8)
+    betweenness_centrality = nx.betweenness_centrality(G)
+    closeness_centrality = nx.closeness_centrality(G)
+    eigenvector_centrality = nx.eigenvector_centrality(G, max_iter=100, tol=1e-6)
 
     sorted_urls = sorted(pagerank_scores, key=pagerank_scores.get, reverse=True)
+    sorted_hubs = sorted(hubs, key=hubs.get, reverse=True)
+    sorted_authorities = sorted(authorities, key=authorities.get, reverse=True)
     url_rank = {url: rank + 1 for rank, url in enumerate(sorted_urls)}
+    hubs_rank = {url: rank + 1 for rank, url in enumerate(sorted_hubs)}
+    authorities_rank = {url: rank + 1 for rank, url in enumerate(sorted_authorities)}
 
     written_ids = set()
     with open("constants.js", "w") as f:
@@ -137,19 +140,30 @@ def run_presidential_election_web_scrapper():
                 name = convert_wikipedia_url_to_text(url)
                 num_edges = incoming_edges_count.get(url, 0)
                 if name in PRESIDENTS:
-                    f.write(f"{{id: {url_to_id[url]}, name: `{name}`, url: `{url}`, rank:{url_rank[url]}, page_rank:{pagerank_scores[url]}, hubs:{hubs[url]}, authorities:{authorities[url]}, num_edges:{num_edges}, partition: {partition[url]}, size: {size}, is_president: true}},\n")
+                    f.write(f"{{id: {url_to_id[url]}, name: `{name}`, url: `{url}`, rank:{url_rank[url]}, page_rank:{pagerank_scores[url]}, hubs:{hubs[url]}, hubs_rank:{hubs_rank[url]}, authorities:{authorities[url]}, authorities_rank:{authorities_rank[url]}, num_edges:{num_edges}, partition: {partition[url]}, size: {size}, is_president: true}},\n")
                 else:
-                     f.write(f"{{id: {url_to_id[url]}, name: `{convert_wikipedia_url_to_text(url)}`, url: `{url}`, rank:{url_rank[url]}, page_rank:{pagerank_scores[url]}, hubs:{hubs[url]}, authorities:{authorities[url]}, num_edges:{num_edges}, partition: {partition[url]}, size: {size}}},\n")
+                     f.write(f"{{id: {url_to_id[url]}, name: `{convert_wikipedia_url_to_text(url)}`, url: `{url}`, rank:{url_rank[url]}, page_rank:{pagerank_scores[url]}, hubs:{hubs[url]}, hubs_rank:{hubs_rank[url]}, authorities:{authorities[url]}, authorities_rank:{authorities_rank[url]}, num_edges:{num_edges}, partition: {partition[url]}, size: {size}}},\n")
                 written_ids.add(url_to_id[url])
         f.write('];')
 
-        # Write links
     with open("constants.js", "a") as f:
         f.write('export const EDGES = [')
         for url, links in adjacency_list.items():
             for link in links:
                 f.write(f"{{source: {url_to_id[url]}, target: {url_to_id[link]}}},\n")
         f.write('];')
+
+    with open("nodes_page_rank.txt", "w") as f:
+        for url in sorted_urls:
+            f.write(f"{convert_wikipedia_url_to_text(url)}: {pagerank_scores[url]}\n")
+
+    with open("nodes_hubs_rank.txt", "w") as f:
+        for url in sorted_hubs:
+            f.write(f"{convert_wikipedia_url_to_text(url)}: {hubs[url]}\n")
+
+    with open("nodes_authorities_rank.txt", "w") as f:
+        for url in sorted_authorities:
+            f.write(f"{convert_wikipedia_url_to_text(url)}: {authorities[url]}\n")
 
 
     print("Adjacency list, nodes, and links created and written to files")
@@ -168,8 +182,8 @@ def write_adjacency_list_to_file(adjacency_list, file_path):
 
 def run_web_scraper(input_file, output_file):
     urls = read_urls_from_file(input_file)
-    url_set = set(urls)  # Convert list to set for faster lookup
-    adjacency_list = {url: [] for url in urls}  # Initialize adjacency list
+    url_set = set(urls)
+    adjacency_list = {url: [] for url in urls}
 
     for url in urls:
         links = get_embedded_links(url)
@@ -180,11 +194,4 @@ def run_web_scraper(input_file, output_file):
 
     write_adjacency_list_to_file(adjacency_list, output_file)
 
-#nodes.push({id: i, name: `Node ${i}`, group: String.fromCharCode(65 + (i % 26))`});
-
-
 run_presidential_election_web_scrapper()
-# Example usage
-#input_file = 'wikilinks.txt'
-#output_file = 'adjacency_list.txt'
-#run_web_scraper(input_file, output_file)
