@@ -1,5 +1,8 @@
 {
     "scripts": {
-      "heroku-postbuild": "cd FinalProject/website && npm install && npm run build"
+        "heroku-postbuild": "cd FinalProject/website && npm install && npm run build"
+    },
+    "devDependencies": {
+        "gh-pages": "^6.2.0"
     }
-  }
+}
